@@ -143,12 +143,8 @@ function getUserName() {
   return getParameterByName('userName');
 }
 
-function scrollToButton() {
-   var message_list = document.getElementById("messages");   
-   var isScrolledToBottom = message_list.scrollHeight - message_list.clientHeight <= message_list.scrollTop + 1;
-
-     if(isScrolledToBottom)
-      message_list.scrollTop = message_list.scrollHeight - message_list.clientHeight;
+function scrollToButton() {  
+  $( "ul" ).scrollTop( $( "ul" ).height() );  
 }
   
 </script>

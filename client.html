@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+     <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }   
+      #messages { list-style-type: none; margin: 0; padding: 0; height: 50px; overflow: hidden; overflow-y: scroll;}
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body>    
+    
+ <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<ul id="messages"></ul>
+<br/>
+ Message: <input type="text" name="fname">
+ <select>
+  <option value="cat">cat</option>
+  <option value="dog">dog</option>  
+</select> 
+<button id="submitBtn" type="button">send</button>
+<br />
+<ul id="users"></ul>
+<script>
+// set-up a connection between the client and the server
+console.log('welcome');
+var socket = io.connect();
+var previous;
+var person;
+
+$( document ).ready(function() {
+  // Handler for .ready() called.
+  if(getUserName())
+  {
+    person = getUserName();
+  }
+  else
+  {
+    person = prompt("Please enter your name", "Harry Potter");   
+  }
+
+  socket.disconnect();
+  socket.connect();
+});
+
+
+  socket.on('connect', function() {
+   // Connected, let's sign-up for to receive messages for this room
+   room = getCurrentRoom();
+   if (person != null)
+   {
+      var message = { room: room, person: person};
+      socket.emit('room', message);   
+   }
+
+   getUsersInRoom(room);
+  });
+
+  socket.on('message', function(data) {
+   console.log('Incoming message:', data);
+   $('#messages').append($('<li>').text(data));
+   scrollToButton();
+  });
+
+  socket.on('room_users', function(users) {
+    
+    console.log('Incoming room_users message:', users);
+    $('#users').empty();
+   for (var index in users)
+   {
+     console.log("User Name in room: " + users[index]);
+     $('#users').append($('<li>').text(users[index]));
+   }  
+
+   
+  });
+
+  socket.on('user_disconnect', function() {
+    getUsersInRoom(getCurrentRoom());
+  });
+
+
+$("select").focus( function () {
+        // Store the current value on focus and on change
+        previous = this.value;
+}).change(function() {
+        // Do something with the previous value after the change
+        //alert(previous);
+        var selected_room = this.value;
+        var message = { room: selected_room, person: person};
+        console.log('Client: You selected ' + selected_room);
+        console.log('Client: You previously selected ' + previous);
+        console.log('Sending to server ' + JSON.stringify(message));
+        socket.emit('room', message);
+        socket.emit('leaveRoom', previous);
+        // Make sure the previous value is updated
+        previous = this.value;
+        $("#users").empty();
+        getUsersInRoom(selected_room);
+});
+
+
+
+$('#submitBtn').click(function(){     
+    var message_text = $("input").val();
+    sendMessage(message_text);
+    $("input").val('');
+
+ });
+
+function sendMessage(message_text) {
+   var room = $("select").val();   
+   var message = { room: room, person: person, message: message_text};
+   console.log(message);
+  socket.emit('message', message);
+}
+
+function getUsersInRoom(room) {  
+   console.log('Client: requesting room list: ' + room);
+   socket.emit('room_in_list', room);
+}
+
+function getCurrentRoom() {
+  return $("select").val();
+}
+
+function getParameterByName(name, url) {
+    if (!url) {
+      url = window.location.href;
+    }
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+function getUserName() {
+  return getParameterByName('userName');
+}
+
+function scrollToButton() {
+   var message_list = document.getElementById("messages");   
+   var isScrolledToBottom = message_list.scrollHeight - message_list.clientHeight <= message_list.scrollTop + 1;
+
+     if(isScrolledToBottom)
+      message_list.scrollTop = message_list.scrollHeight - message_list.clientHeight;
+}
+  
+</script>
+
+  </body>
+</html>

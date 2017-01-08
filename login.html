@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    
+    <title>Signin Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> 
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    
+
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <form class="form-signin" action="http://127.0.0.1:3000" method="GET>
+        <h2 class="form-signin-heading">Please sign in</h2>
+        <label for="hostName" class="sr-only">hostName</label>
+        <input type="text" id="inputHostName" name="hostName" class="form-control" placeholder="HostName" value="http://127.0.0.1:3000" required autofocus>
+        <label for="userName" class="sr-only">userName</label>
+        <input type="text" id="inputUserName" name="userName" class="form-control" placeholder="User Name" required autofocus>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="hidden" id="inputPassword" class="form-control" placeholder="Password" >        
+        <button id="submitBtn" class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+      </form>
+
+    </div> <!-- /container -->
+  
+    <script type="text/javascript">
+      $('#submitBtn').click(function(){     
+        var chat_host = $("#inputHostName").val();
+
+        // sendMessage(message_text);      
+        alert(chat_host);
+        var socket = io.connect(chat_host);
+
+      });
+
+    </script>
+  </body>
+</html>

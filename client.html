@@ -5,7 +5,7 @@
      <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial; }   
-      #messages { list-style-type: none; margin: 0; padding: 0; height: 50px; overflow: hidden; overflow-y: scroll;}
+      #messages { list-style-type: none; margin: 0; padding: 0; height: 150px; overflow: hidden; overflow-y: scroll;}
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
     </style>
@@ -99,6 +99,7 @@ $("select").focus( function () {
         // Make sure the previous value is updated
         previous = this.value;
         $("#users").empty();
+        $("#messages").empty();
         getUsersInRoom(selected_room);
 });
 

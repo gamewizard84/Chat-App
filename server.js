@@ -10,6 +10,47 @@ http.listen(3000, function(){
   console.log('listening on *:3000');
 });
 
+
+
+function saveMessage(message)
+{
+
+	// Retrieve
+	var MongoClient = require('mongodb').MongoClient;
+
+// Connect to the db
+	MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  		if(!err) {
+    		console.log("We are connected");
+     		var collection = db.collection('messages');  	 		
+     		collection.insert(message);
+  	}
+	});
+
+}
+
+function sendArchivedMessages(room)
+{
+
+	// Retrieve
+	var MongoClient = require('mongodb').MongoClient;
+
+// Connect to the db
+	MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  		if(!err) {
+    		console.log("We are connected");
+     		var collection = db.collection('messages');     		 		
+     		collection.find({room: room}).toArray(function(err, items) {
+     			sendRoomMessage(room, items);
+     			//console.log(items);
+     		});	     		
+	
+		}
+	});
+
+}
+
+
 function getUsersInRoom(room)
 {
 	var rooms = io.sockets.adapter.rooms;
@@ -39,13 +80,18 @@ function getUsersInRoom(room)
 function sendRoomUsers(room)
 {
 	var users = getUsersInRoom(room);
-	io.in(room).emit('room_users', users);
+	io.in(room).emit('room_users', users);    	
+}
 
-    	// for (var index in users)
-    	// {
-    	// 	console.log("User Name in room: " + users[index]);
-    	// 	io.in(room).emit('room_users', users[index]);
-    	// }
+function sendRoomMessage(room, message)
+{
+	
+	for (var i = 0; i < message.length; i++) {  		
+		
+		io.in(room).emit('message', message[i]['person'] + ': ' + message[i]['message']);	
+			
+	}
+	
 }
 
 function getConnectionCount()
@@ -95,7 +141,9 @@ io.on('connection', function(socket) {
         	socket.join(room['room']);        
         	socket.name = room['person'];
         
-        	io.in(room).emit('message', 'Welcome to the room: ' + room);
+        	io.in(room['room']).emit('message', 'Welcome to the room: ' + room['room']);
+        	sendArchivedMessages(room['room']);
+        	
         	getRoomUserCount(room['room']);
         	sendRoomUsers(room['room']);
     	}   
@@ -115,6 +163,7 @@ io.on('connection', function(socket) {
     socket.on('message', function(client) {
     	console.log("hello: " + JSON.stringify(client));
     	console.log("client came from room: " + client['room']);
+    	saveMessage(client);
     	io.in(client['room']).emit('message', client['person'] + ': ' + client['message']);
     	console.log('Connected clients: ' + getConnectionCount());    	
     });
